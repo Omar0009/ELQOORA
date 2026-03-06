@@ -1,0 +1,35 @@
+{% extends 'store/base.html' %}
+{% load humanize %}
+{% block title %}My Orders — ELQOORA{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><h1>📦 My <span>Orders</span></h1></div></div>
+<div class="container" style="padding:32px 0 60px;">
+{% if orders %}
+{% for order in orders %}
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px;transition:.3s;animation:slideUp .4s ease {{ forloop.counter0 }}00ms both;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div style="font-size:16px;font-weight:800;color:var(--gold);">#{{ order.order_number }}</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:2px;">{{ order.created_at|date:"M d, Y — g:i A" }}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="background:{% if order.status == 'delivered' %}rgba(16,185,129,.15){% elif order.status == 'cancelled' %}rgba(239,68,68,.15){% elif order.status == 'shipped' %}rgba(6,182,212,.15){% else %}rgba(201,168,76,.15){% endif %};color:{% if order.status == 'delivered' %}#6ee7b7{% elif order.status == 'cancelled' %}#fca5a5{% elif order.status == 'shipped' %}#67e8f9{% else %}var(--gold){% endif %};padding:4px 14px;border-radius:999px;font-size:12px;font-weight:700;text-transform:uppercase;">{{ order.get_status_display }}</span>
+      <span style="font-size:18px;font-weight:900;color:var(--text);">৳{{ order.grand_total|floatformat:0|intcomma }}</span>
+    </div>
+  </div>
+  <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text2);">
+    <span><i class="fas fa-credit-card" style="color:var(--gold);"></i> {{ order.get_payment_method_display }}</span>
+    <span><i class="fas fa-map-marker-alt" style="color:var(--gold);"></i> {{ order.city }}, {{ order.district }}</span>
+    <span><i class="fas fa-box" style="color:var(--gold);"></i> {{ order.items.count }} item(s)</span>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div style="text-align:center;padding:80px 20px;">
+  <div style="font-size:64px;margin-bottom:16px;">📭</div>
+  <h3 style="font-size:22px;color:var(--text);margin-bottom:8px;">No orders yet</h3>
+  <a href="{% url 'store:product_list' %}" class="btn btn-gold" style="margin-top:16px;"><i class="fas fa-shopping-bag"></i> Start Shopping</a>
+</div>
+{% endif %}
+</div>
+{% endblock %}

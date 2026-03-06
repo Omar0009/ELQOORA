@@ -1,0 +1,362 @@
+{% extends "admin/base_site.html" %}
+{% load humanize %}
+
+{% block content_title %}{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+*{box-sizing:border-box}
+#dr{font-family:'Inter',sans-serif;background:#f2f2f2;min-height:100vh;padding:0;margin:-20px;color:#1a1a1a}
+
+/* Header */
+.dh{background:#fff;border-bottom:3px solid #c8102e;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.dh-brand{display:flex;align-items:center;gap:12px}
+.dh-logo{height:40px;width:40px;border-radius:8px;object-fit:cover}
+.dh-title{font-size:22px;font-weight:800;color:#c8102e;letter-spacing:.5px}
+.dh-sub{font-size:12px;color:#888;margin-top:2px}
+.dh-actions{display:flex;gap:8px}
+.dh-btn{padding:8px 16px;border-radius:7px;font-size:13px;font-weight:700;text-decoration:none;transition:.2s;border:none;cursor:pointer;font-family:inherit}
+.dh-btn-red{background:#c8102e;color:#fff}
+.dh-btn-red:hover{background:#a00d24}
+.dh-btn-gray{background:#f3f4f6;color:#555;border:1.5px solid #e0e0e0}
+.dh-btn-gray:hover{background:#e5e7eb}
+
+.db{padding:22px 28px}
+
+/* Alert box */
+.alert-box{background:#fff;border:2px solid #c8102e;border-radius:12px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:flex-start;gap:16px}
+.alert-icon{width:44px;height:44px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.alert-orders{flex:1}
+.alert-orders h3{font-size:15px;font-weight:800;color:#c8102e;margin-bottom:10px}
+.order-row{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:8px;transition:.15s;text-decoration:none;color:inherit}
+.order-row:hover{background:#fef2f2}
+.or-num{font-weight:800;color:#c8102e;font-size:13px;min-width:110px}
+.or-name{font-size:13px;font-weight:600;flex:1}
+.or-phone{font-size:12px;color:#888;min-width:110px}
+.or-total{font-size:13px;font-weight:800;color:#1a1a1a;min-width:80px;text-align:right}
+.or-time{font-size:11px;color:#aaa;min-width:90px;text-align:right}
+.or-method{font-size:11px;background:#f3f4f6;padding:2px 8px;border-radius:99px;color:#555;font-weight:600}
+.view-all-orders{display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:13px;font-weight:700;color:#c8102e;text-decoration:none;padding:6px 14px;background:#fee2e2;border-radius:7px;transition:.2s}
+.view-all-orders:hover{background:#fecaca}
+
+/* Stats grid */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;transition:.25s;cursor:default}
+.stat:hover{border-color:#c8102e;box-shadow:0 6px 20px rgba(200,16,46,.1);transform:translateY(-2px)}
+.stat-icon{font-size:24px;margin-bottom:10px}
+.stat-val{font-size:28px;font-weight:800;color:#c8102e;line-height:1}
+.stat-lbl{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.8px;margin-top:5px}
+.stat-sub{font-size:11px;color:#aaa;margin-top:3px}
+.sbadge{position:absolute;top:14px;right:14px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
+.sg{background:#d1fae5;color:#065f46}
+.sr{background:#fee2e2;color:#991b1b}
+.sy{background:#fef3c7;color:#92400e}
+.sb{background:#dbeafe;color:#1e40af}
+
+/* Status tiles */
+.status-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+.stile{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:14px;text-align:center;transition:.2s}
+.stile:hover{border-color:#c8102e}
+.stile .sn{font-size:26px;font-weight:800;margin-bottom:3px}
+.stile .sl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.8px}
+
+/* Charts */
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:20px}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:20px}
+.card-title{font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:7px}
+
+/* Tables */
+.tables-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.dtable{width:100%;border-collapse:collapse}
+.dtable th{font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.8px;padding:7px 10px;text-align:left;border-bottom:1px solid #f0f0f0}
+.dtable td{font-size:12.5px;color:#333;padding:9px 10px;border-bottom:1px solid #f8f8f8;vertical-align:middle}
+.dtable tr:last-child td{border-bottom:none}
+.dtable tr:hover td{background:#fafafa}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:10px;font-weight:700;text-transform:uppercase}
+.p-pending{background:#fef3c7;color:#92400e}
+.p-confirmed{background:#dbeafe;color:#1e40af}
+.p-processing{background:#ede9fe;color:#5b21b6}
+.p-shipped{background:#cffafe;color:#0e7490}
+.p-delivered{background:#d1fae5;color:#065f46}
+.p-cancelled{background:#fee2e2;color:#991b1b}
+
+/* Stock bar */
+.sbar{width:50px;height:5px;background:#f0f0f0;border-radius:99px;overflow:hidden}
+.sbar-fill{height:100%;border-radius:99px}
+</style>
+
+<div id="dr">
+  <!-- Header -->
+  <div class="dh">
+    <div class="dh-brand">
+      <div>
+        <div class="dh-title">ELQOORA Admin</div>
+        <div class="dh-sub">Dashboard — {{ "now"|date:"l, F j, Y" }}</div>
+      </div>
+    </div>
+    <div class="dh-actions">
+      <a href="/admin/store/product/add/" class="dh-btn dh-btn-red">+ Add Product</a>
+      <a href="/admin/store/order/" class="dh-btn dh-btn-gray">📦 All Orders</a>
+      <a href="/admin/store/category/add/" class="dh-btn dh-btn-gray">+ Category</a>
+      <a href="/" class="dh-btn dh-btn-gray">🌐 View Store</a>
+    </div>
+  </div>
+
+  <div class="db">
+
+    <!-- 🔔 NEW ORDERS ALERT — This is how you see incoming orders -->
+    <div class="alert-box">
+      <div class="alert-icon">🔔</div>
+      <div class="alert-orders">
+        <h3>🛍️ Pending Orders — Action Required ({{ pending_orders }})</h3>
+        {% if new_pending %}
+          {% for order in new_pending %}
+          <a href="/admin/store/order/{{ order.pk }}/change/" class="order-row">
+            <span class="or-num">#{{ order.order_number }}</span>
+            <span class="or-name">{{ order.full_name }}</span>
+            <span class="or-phone"><i class="fas fa-phone" style="font-size:10px;color:#aaa;margin-right:4px;"></i>{{ order.phone }}</span>
+            <span class="or-method">{{ order.get_payment_method_display }}</span>
+            <span class="or-total">৳{{ order.grand_total|floatformat:0|intcomma }}</span>
+            <span class="or-time">{{ order.created_at|timesince }} ago</span>
+          </a>
+          {% endfor %}
+          <a href="/admin/store/order/?status__exact=pending" class="view-all-orders">View All Pending Orders →</a>
+        {% else %}
+          <p style="color:#888;font-size:14px;padding:10px 0;">✅ No pending orders right now. All caught up!</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Stats Row 1 -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-icon">💰</div>
+        <div class="stat-val">৳{{ total_revenue|floatformat:0|intcomma }}</div>
+        <div class="stat-lbl">Total Revenue</div>
+        <div class="stat-sub">৳{{ month_revenue|floatformat:0|intcomma }} this month</div>
+        <span class="sbadge sg">BDT</span>
+      </div>
+      <div class="stat">
+        <div class="stat-icon">🛍️</div>
+        <div class="stat-val">{{ total_orders }}</div>
+        <div class="stat-lbl">Total Orders</div>
+        <div class="stat-sub">{{ today_orders }} today · {{ pending_orders }} pending</div>
+        <span class="sbadge sy">Live</span>
+      </div>
+      <div class="stat">
+        <div class="stat-icon">📦</div>
+        <div class="stat-val">{{ total_products }}</div>
+        <div class="stat-lbl">Products</div>
+        <div class="stat-sub">{{ available_products }} active · {{ out_of_stock }} out of stock</div>
+        {% if out_of_stock > 0 %}<span class="sbadge sr">⚠ Alert</span>{% else %}<span class="sbadge sg">✓ OK</span>{% endif %}
+      </div>
+      <div class="stat">
+        <div class="stat-icon">👥</div>
+        <div class="stat-val">{{ total_customers }}</div>
+        <div class="stat-lbl">Customers</div>
+        <div class="stat-sub">+{{ new_customers_month }} this month</div>
+        <span class="sbadge sb">+New</span>
+      </div>
+    </div>
+
+    <!-- Stats Row 2 -->
+    <div class="stats" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat" style="padding:14px 18px;">
+        <div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;">Today Revenue</div>
+        <div style="font-size:20px;font-weight:800;color:#c8102e;">৳{{ today_revenue|floatformat:0|intcomma }}</div>
+      </div>
+      <div class="stat" style="padding:14px 18px;">
+        <div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;">Delivered</div>
+        <div style="font-size:20px;font-weight:800;color:#10b981;">{{ delivered_orders }}</div>
+      </div>
+      <div class="stat" style="padding:14px 18px;">
+        <div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;">Low Stock</div>
+        <div style="font-size:20px;font-weight:800;color:#f59e0b;">{{ low_stock }}</div>
+      </div>
+      <div class="stat" style="padding:14px 18px;">
+        <div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;">Reviews</div>
+        <div style="font-size:20px;font-weight:800;color:#8b5cf6;">{{ total_reviews }}</div>
+      </div>
+    </div>
+
+    <!-- Order Status -->
+    <div class="status-row">
+      <div class="stile"><div class="sn" style="color:#f59e0b;">{{ status_counts.pending }}</div><div class="sl">⏳ Pending</div></div>
+      <div class="stile"><div class="sn" style="color:#3b82f6;">{{ status_counts.confirmed }}</div><div class="sl">✅ Confirmed</div></div>
+      <div class="stile"><div class="sn" style="color:#8b5cf6;">{{ status_counts.processing }}</div><div class="sl">⚙️ Processing</div></div>
+      <div class="stile"><div class="sn" style="color:#06b6d4;">{{ status_counts.shipped }}</div><div class="sl">🚚 Shipped</div></div>
+      <div class="stile"><div class="sn" style="color:#10b981;">{{ status_counts.delivered }}</div><div class="sl">📬 Delivered</div></div>
+      <div class="stile"><div class="sn" style="color:#ef4444;">{{ status_counts.cancelled }}</div><div class="sl">❌ Cancelled</div></div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="card">
+        <div class="card-title">📈 7-Day Sales Overview</div>
+        <canvas id="salesChart" style="max-height:250px;"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">🍩 Top Categories (This Month)</div>
+        <canvas id="catChart" style="max-height:200px;"></canvas>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:7px;">
+          {% for c in cat_data %}
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+            <span style="color:#555;">{{ c.product__category__name|default:"Uncategorized" }}</span>
+            <span style="font-weight:700;color:#c8102e;">{{ c.total_qty }} sold</span>
+          </div>
+          {% empty %}<div style="color:#aaa;font-size:13px;text-align:center;padding:20px;">No sales data yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Tables -->
+    <div class="tables-row">
+      <div class="card">
+        <div class="card-title">🧾 Recent Orders
+          <a href="/admin/store/order/" style="margin-left:auto;font-size:11px;color:#c8102e;text-decoration:none;font-weight:700;padding:4px 10px;background:#fee2e2;border-radius:5px;">View All →</a>
+        </div>
+        <table class="dtable">
+          <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Time</th></tr></thead>
+          <tbody>
+            {% for o in recent_orders %}
+            <tr>
+              <td><a href="/admin/store/order/{{ o.pk }}/change/" style="color:#c8102e;font-weight:700;text-decoration:none;">#{{ o.order_number }}</a></td>
+              <td>
+                <div style="font-weight:600;font-size:12px;">{{ o.full_name|truncatechars:16 }}</div>
+                <div style="color:#aaa;font-size:11px;">{{ o.phone }}</div>
+              </td>
+              <td style="font-weight:800;color:#c8102e;">৳{{ o.grand_total|floatformat:0|intcomma }}</td>
+              <td><span class="pill p-{{ o.status }}">{{ o.get_status_display }}</span></td>
+              <td style="color:#aaa;font-size:11px;">{{ o.created_at|timesince }} ago</td>
+            </tr>
+            {% empty %}<tr><td colspan="5" style="text-align:center;color:#aaa;padding:30px;">No orders yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card" style="flex:1;">
+          <div class="card-title">🔥 Top Products
+            <a href="/admin/store/product/" style="margin-left:auto;font-size:11px;color:#c8102e;text-decoration:none;font-weight:700;padding:4px 10px;background:#fee2e2;border-radius:5px;">Manage →</a>
+          </div>
+          <table class="dtable">
+            <thead><tr><th>Product</th><th>Price</th><th>Views</th></tr></thead>
+            <tbody>
+              {% for p in top_products %}
+              <tr>
+                <td><a href="/admin/store/product/{{ p.pk }}/change/" style="color:#333;text-decoration:none;font-size:12px;font-weight:600;">{{ p.name|truncatechars:24 }}</a></td>
+                <td style="color:#c8102e;font-weight:700;font-size:12px;">৳{{ p.price|floatformat:0|intcomma }}</td>
+                <td style="color:#888;font-size:12px;">{{ p.views }}</td>
+              </tr>
+              {% empty %}<tr><td colspan="3" style="text-align:center;color:#aaa;padding:20px;">No products.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if low_stock_prods %}
+        <div class="card" style="border-color:#fef3c7;">
+          <div class="card-title" style="color:#92400e;">⚠️ Low Stock Alert</div>
+          <table class="dtable">
+            <thead><tr><th>Product</th><th>Stock</th></tr></thead>
+            <tbody>
+              {% for p in low_stock_prods %}
+              <tr>
+                <td><a href="/admin/store/product/{{ p.pk }}/change/" style="color:#92400e;text-decoration:none;font-size:12px;font-weight:600;">{{ p.name|truncatechars:26 }}</a></td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:7px;">
+                    <div class="sbar"><div class="sbar-fill" style="width:{% if p.stock > 0 %}{{ p.stock }}0{% else %}5{% endif %}%;background:{% if p.stock == 0 %}#ef4444{% elif p.stock <= 2 %}#f59e0b{% else %}#10b981{% endif %};"></div></div>
+                    <b style="font-size:13px;color:{% if p.stock == 0 %}#ef4444{% elif p.stock <= 2 %}#f59e0b{% else %}#10b981{% endif %};">{{ p.stock }}</b>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+Chart.defaults.color = '#888';
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+const labels = {{ chart_labels|safe }};
+const ordersData = {{ chart_orders|safe }};
+const revenueData = {{ chart_revenue|safe }};
+
+new Chart(document.getElementById('salesChart'), {
+  type: 'bar',
+  data: {
+    labels: labels.length ? labels : ['No Data'],
+    datasets: [
+      {
+        label: 'Orders',
+        data: ordersData.length ? ordersData : [0],
+        backgroundColor: 'rgba(200,16,46,0.15)',
+        borderColor: '#c8102e',
+        borderWidth: 2,
+        borderRadius: 7,
+        yAxisID: 'y',
+      },
+      {
+        label: 'Revenue ৳',
+        data: revenueData.length ? revenueData : [0],
+        type: 'line',
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(245,158,11,0.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#f59e0b',
+        pointRadius: 4,
+        fill: true,
+        tension: 0.4,
+        yAxisID: 'y1',
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    interaction: {mode: 'index', intersect: false},
+    plugins: {legend: {labels: {font: {size: 12}}}},
+    scales: {
+      y: {grid: {color: 'rgba(0,0,0,0.04)'}, ticks: {color: '#aaa'}},
+      y1: {position: 'right', grid: {drawOnChartArea: false}, ticks: {color: '#aaa'}},
+      x: {grid: {color: 'rgba(0,0,0,0.04)'}, ticks: {color: '#aaa'}},
+    }
+  }
+});
+
+const catLabels = [{% for c in cat_data %}'{{ c.product__category__name|default:"Other" }}',{% endfor %}];
+const catVals = [{% for c in cat_data %}{{ c.total_qty }},{% endfor %}];
+new Chart(document.getElementById('catChart'), {
+  type: 'doughnut',
+  data: {
+    labels: catLabels.length ? catLabels : ['No Data'],
+    datasets: [{
+      data: catVals.length ? catVals : [1],
+      backgroundColor: ['#c8102e','#f59e0b','#10b981','#3b82f6','#8b5cf6','#06b6d4'],
+      borderWidth: 0,
+      hoverOffset: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '68%',
+    plugins: {legend: {display: false}}
+  }
+});
+
+// Auto-refresh every 60 seconds to catch new orders
+setTimeout(() => location.reload(), 60000);
+</script>
+{% endblock %}

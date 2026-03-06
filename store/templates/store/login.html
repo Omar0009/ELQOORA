@@ -1,0 +1,27 @@
+{% extends 'store/base.html' %}
+{% block title %}Login — ELQOORA{% endblock %}
+{% block content %}
+<div style="min-height:70vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:420px;animation:zoomIn .4s ease;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-family:'Cinzel',serif;font-size:36px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px;">ELQOORA</div>
+      <p style="color:var(--text2);margin-top:8px;font-size:14px;">Welcome back! Sign in to your account.</p>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-user" style="color:var(--gold);margin-right:6px;"></i>Username</label>
+        {{ form.username }}
+        {% for e in form.username.errors %}<div class="form-err">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-lock" style="color:var(--gold);margin-right:6px;"></i>Password</label>
+        {{ form.password }}
+        {% for e in form.password.errors %}<div class="form-err">{{ e }}</div>{% endfor %}
+      </div>
+      <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;font-size:15px;padding:13px;margin-top:8px;"><i class="fas fa-sign-in-alt"></i> Login</button>
+    </form>
+    <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--text2);">Don't have an account? <a href="{% url 'store:register' %}" style="color:var(--gold);font-weight:700;">Register</a></p>
+  </div>
+</div>
+{% endblock %}

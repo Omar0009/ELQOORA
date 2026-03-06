@@ -1,0 +1,145 @@
+{% extends 'store/base.html' %}
+{% load humanize %}
+{% block title %}{% if current_category %}{{ current_category.name }}{% elif search %}Search: {{ search }}{% else %}All Products{% endif %} — ELQOORA{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top:24px;padding-bottom:60px;">
+  <div style="display:grid;grid-template-columns:240px 1fr;gap:22px;align-items:start;">
+
+    <!-- Sidebar -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:20px;position:sticky;top:90px;">
+      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:18px;display:flex;align-items:center;gap:8px;"><i class="fas fa-sliders-h" style="color:var(--red)"></i> Filters</div>
+      <form method="get">
+        {% if request.GET.q %}<input type="hidden" name="q" value="{{ request.GET.q }}">{% endif %}
+
+        <div style="margin-bottom:20px;">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Category</div>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;font-size:13px;">
+            <input type="radio" name="category" value="" {% if not current_category %}checked{% endif %} style="accent-color:var(--red)"> All Categories
+          </label>
+          {% for cat in categories %}
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;font-size:13px;color:{% if current_category.slug == cat.slug %}var(--red){% else %}var(--text){% endif %};">
+            <input type="radio" name="category" value="{{ cat.slug }}" {% if current_category.slug == cat.slug %}checked{% endif %} style="accent-color:var(--red)">
+            {% if cat.icon %}<i class="{{ cat.icon }}" style="width:14px;color:var(--red);font-size:12px"></i>{% endif %} {{ cat.name }}
+          </label>
+          {% endfor %}
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:20px;">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Price Range (৳)</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" name="min_price" value="{{ min_price }}" placeholder="Min" class="eq-input" style="padding:8px 10px;font-size:12px;">
+            <span style="color:var(--text3);font-size:12px;">–</span>
+            <input type="number" name="max_price" value="{{ max_price }}" placeholder="Max" class="eq-input" style="padding:8px 10px;font-size:12px;">
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:18px;">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Sort By</div>
+          <select name="sort" class="eq-input" style="font-size:13px;padding:8px 10px;">
+            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest First</option>
+            <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low → High</option>
+            <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High → Low</option>
+            <option value="popular" {% if sort == 'popular' %}selected{% endif %}>Most Popular</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-red" style="width:100%;justify-content:center;padding:10px;"><i class="fas fa-filter"></i> Apply</button>
+        <a href="{% url 'store:product_list' %}" class="btn btn-gray" style="width:100%;justify-content:center;padding:9px;margin-top:8px;font-size:12px;"><i class="fas fa-times"></i> Clear</a>
+      </form>
+    </div>
+
+    <!-- Products Area -->
+    <div>
+      <!-- Header -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <span style="font-size:15px;font-weight:700;color:var(--text);">
+            {% if current_category %}{{ current_category.name }}
+            {% elif search %}Results for "{{ search }}"
+            {% else %}All Products{% endif %}
+          </span>
+          <span style="font-size:13px;color:var(--text3);margin-left:8px;">({{ products.paginator.count }} items)</span>
+        </div>
+        {% if search %}
+        <a href="{% url 'store:product_list' %}" style="font-size:12px;color:var(--red);font-weight:600;"><i class="fas fa-times"></i> Clear search</a>
+        {% endif %}
+      </div>
+
+      {% if products %}
+      <div class="pgrid">
+        {% for product in products %}
+        <div class="pcard" style="animation-delay:{{ forloop.counter0 }}0ms">
+          <div class="pcard-img">
+            <a href="{{ product.get_absolute_url }}">
+              {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+              {% else %}<div class="no-img"><i class="fas fa-image"></i><span style="font-size:11px">No image</span></div>{% endif %}
+            </a>
+            {% if product.discount_percent %}<span class="disc-badge">{{ product.discount_percent }}% OFF</span>
+            {% elif product.new_arrival %}<span class="new-badge">NEW</span>{% endif %}
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'store:toggle_wishlist' product.pk %}" style="display:contents">
+              {% csrf_token %}<button type="submit" class="wish-btn"><i class="fas fa-heart"></i></button>
+            </form>
+            {% endif %}
+          </div>
+          <div class="pcard-body">
+            <div class="delivery-line"><i class="fas fa-clock"></i> Delivery 1–3 days</div>
+            <a href="{{ product.get_absolute_url }}"><div class="pcard-name">{{ product.name }}</div></a>
+            <div class="pcard-unit">{{ product.category.name }}</div>
+            <div class="price-row">
+              <span class="p-now">৳{{ product.price|floatformat:0|intcomma }}</span>
+              <span class="p-unit">Per Piece</span>
+              {% if product.original_price %}<span class="p-old">৳{{ product.original_price|floatformat:0|intcomma }}</span>{% endif %}
+            </div>
+            {% if product.is_in_stock %}
+            <form method="post" action="{% url 'store:add_to_cart' product.pk %}">
+              {% csrf_token %}<input type="hidden" name="quantity" value="1">
+              <button type="submit" class="add-btn"><i class="fas fa-plus"></i> Add to Bag</button>
+            </form>
+            {% else %}
+            <button class="add-btn oos" disabled>Out of Stock</button>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if products.has_other_pages %}
+      <div style="display:flex;justify-content:center;gap:6px;margin-top:36px;flex-wrap:wrap;">
+        {% if products.has_previous %}
+        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}sort={{ sort }}&page={{ products.previous_page_number }}"
+           style="padding:8px 16px;background:#fff;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;transition:.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
+          ← Prev
+        </a>
+        {% endif %}
+        {% for num in products.paginator.page_range %}
+        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}sort={{ sort }}&page={{ num }}"
+           style="padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;transition:.2s;
+           {% if products.number == num %}background:var(--red);color:#fff;border:1.5px solid var(--red);
+           {% else %}background:#fff;border:1.5px solid var(--border);color:var(--text);{% endif %}">
+          {{ num }}
+        </a>
+        {% endfor %}
+        {% if products.has_next %}
+        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}sort={{ sort }}&page={{ products.next_page_number }}"
+           style="padding:8px 16px;background:#fff;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;transition:.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
+          Next →
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);text-align:center;padding:80px 20px;">
+        <div style="font-size:60px;margin-bottom:16px;">🔍</div>
+        <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;">No products found</h3>
+        <p style="color:var(--text3);margin-bottom:20px;">Try different filters or search terms.</p>
+        <a href="{% url 'store:product_list' %}" class="btn btn-red">Browse All Products</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

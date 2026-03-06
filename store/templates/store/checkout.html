@@ -1,0 +1,80 @@
+{% extends 'store/base.html' %}
+{% load humanize %}
+{% block title %}Checkout — ELQOORA{% endblock %}
+{% block content %}
+<div class="page-hero"><div class="container"><h1>🔒 Secure Checkout</h1><div class="breadcrumb"><a href="/">Home</a><i class="fas fa-chevron-right"></i><a href="{% url 'store:cart' %}">Bag</a><i class="fas fa-chevron-right"></i><span>Checkout</span></div></div></div>
+<div class="container" style="padding-top:28px;padding-bottom:60px;">
+<form method="post">
+{% csrf_token %}
+<div style="display:grid;grid-template-columns:1fr 380px;gap:22px;align-items:start;">
+  <!-- Left: Forms -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <!-- Personal Info -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:24px;">
+      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:20px;display:flex;align-items:center;gap:8px;"><span style="width:28px;height:28px;background:var(--red);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;">1</span> Personal Details</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="form-group"><label class="form-label">Full Name *</label>{{ form.full_name }}{% for e in form.full_name.errors %}<div class="form-err">{{ e }}</div>{% endfor %}</div>
+        <div class="form-group"><label class="form-label">Phone *</label>{{ form.phone }}{% for e in form.phone.errors %}<div class="form-err">{{ e }}</div>{% endfor %}</div>
+      </div>
+      <div class="form-group"><label class="form-label">Email *</label>{{ form.email }}{% for e in form.email.errors %}<div class="form-err">{{ e }}</div>{% endfor %}</div>
+    </div>
+
+    <!-- Address -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:24px;">
+      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:20px;display:flex;align-items:center;gap:8px;"><span style="width:28px;height:28px;background:var(--red);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;">2</span> Delivery Address</div>
+      <div class="form-group"><label class="form-label">Full Address *</label>{{ form.address }}{% for e in form.address.errors %}<div class="form-err">{{ e }}</div>{% endfor %}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+        <div class="form-group"><label class="form-label">City *</label>{{ form.city }}</div>
+        <div class="form-group"><label class="form-label">District *</label>{{ form.district }}</div>
+        <div class="form-group"><label class="form-label">Postal Code</label>{{ form.postal_code }}</div>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:24px;">
+      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:20px;display:flex;align-items:center;gap:8px;"><span style="width:28px;height:28px;background:var(--red);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;">3</span> Payment Method</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        {% for value, label in form.fields.payment_method.choices %}
+        <label class="pay-opt" style="display:flex;align-items:center;gap:10px;background:#f9fafb;border:2px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:.2s;">
+          <input type="radio" name="payment_method" value="{{ value }}" {% if value == 'cod' %}checked{% endif %} style="accent-color:var(--red);" onchange="this.closest('.pay-opt').style.borderColor='var(--red)';document.querySelectorAll('.pay-opt').forEach(o=>{if(!o.querySelector('input:checked'))o.style.borderColor='var(--border)'})">
+          <span style="font-size:13px;font-weight:700;">{% if value == 'cod' %}💵{% elif value == 'bkash' %}💳{% elif value == 'nagad' %}🟠{% else %}🚀{% endif %} {{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      <div class="form-group"><label class="form-label">Order Notes (optional)</label>{{ form.notes }}</div>
+    </div>
+  </div>
+
+  <!-- Right: Summary -->
+  <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:24px;position:sticky;top:90px;">
+    <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);">Your Order</div>
+    {% for item in cart_items %}
+    <div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+      <div style="width:46px;height:46px;border-radius:8px;overflow:hidden;flex-shrink:0;background:#f5f5f5;display:flex;align-items:center;justify-content:center;padding:4px;">
+        {% if item.product.image %}<img src="{{ item.product.image.url }}" style="max-width:100%;max-height:100%;object-fit:contain;">
+        {% else %}<i class="fas fa-image" style="color:#ddd;font-size:16px;"></i>{% endif %}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ item.product.name|truncatechars:30 }}</div>
+        <div style="font-size:11px;color:var(--text3);">× {{ item.quantity }}</div>
+      </div>
+      <div style="font-size:13px;font-weight:800;color:var(--red);flex-shrink:0;">৳{{ item.subtotal|floatformat:0|intcomma }}</div>
+    </div>
+    {% endfor %}
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2);"><span>Subtotal</span><span>৳{{ total|floatformat:0|intcomma }}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2);"><span>Delivery</span><span style="color:#10b981;">৳{{ delivery }}</span></div>
+      <div style="border-top:2px solid var(--border);padding-top:12px;display:flex;justify-content:space-between;font-size:20px;font-weight:900;"><span>Total</span><span style="color:var(--red);">৳{{ grand_total|floatformat:0|intcomma }}</span></div>
+    </div>
+    <button type="submit" class="btn btn-red" style="width:100%;justify-content:center;font-size:15px;padding:14px;margin-top:18px;"><i class="fas fa-check-circle"></i> Place Order</button>
+    <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--text3);"><i class="fas fa-lock" style="color:var(--red);"></i> Secure & protected</div>
+  </div>
+</div>
+</form>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelectorAll('.pay-opt input:checked').forEach(i=>{i.closest('.pay-opt').style.borderColor='var(--red)'});
+</script>
+{% endblock %}
