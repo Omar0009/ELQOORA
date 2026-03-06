@@ -1,12 +1,13 @@
-# ELQOORA — Premium E-Commerce Platform 🛍️
+ELQOORA — Premium E-Commerce Platform 🛍️
 
-**Bangladesh's Premium Online Store** — Built with Django, payments in BDT ৳
+Bangladesh's Premium Online Store 
+Built with Django, payments in BDT ৳
 
 ---
 
-## ✨ Features
+##  Features
 
-### 🛒 Store
+## 🛒 Store
 - Animated homepage with hero, marquee, category grid, countdown timer
 - Product listings with filters (category, price range, sort)
 - Product detail with image zoom, quantity picker, reviews & ratings
@@ -110,4 +111,5 @@ elqoora/
 
 ---
 
-Made with ❤️ for Bangladesh 🇧🇩
+Made with ❤️ for you 
+thanks from Omar
