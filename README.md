@@ -1,4 +1,5 @@
 ELQOORA — Premium E-Commerce Platform 🛍️
+Made for my own practise
 
 Bangladesh's Premium Online Store 
 Built with Django, payments in BDT ৳
